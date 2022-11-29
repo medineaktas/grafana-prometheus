@@ -49,16 +49,8 @@ services:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
-
-    # restart: unless-stopped
     ports:
       - "5002:3000"
-    # volumes:
-    #   # - ./config/grafana/custom.ini:/etc/grafana/custom.ini
-    #   # - ./config/grafana/provisioning/:/etc/grafana/provisioning/
-    #   - type: bind
-    #     source: ./config/grafana/dashboard.json
-    #     target: /var/lib/grafana/dashboards/curity/dashboard.json
     depends_on:
       - prometheus
     networks:
