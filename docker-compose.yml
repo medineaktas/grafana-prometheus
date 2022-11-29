@@ -1,0 +1,66 @@
+version: "3"
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data: {} 
+
+services:
+  portainer:
+    image: portainer/portainer
+    restart: always
+    container_name: portainer
+    ports:
+      - "8004:8004"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+    # restart: unless-stopped
+    ports:
+      - "5002:3000"
+    # volumes:
+    #   # - ./config/grafana/custom.ini:/etc/grafana/custom.ini
+    #   # - ./config/grafana/provisioning/:/etc/grafana/provisioning/
+    #   - type: bind
+    #     source: ./config/grafana/dashboard.json
+    #     target: /var/lib/grafana/dashboards/curity/dashboard.json
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
